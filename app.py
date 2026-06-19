@@ -179,9 +179,8 @@ def build_comparison_chart(plot_df: pd.DataFrame) -> go.Figure:
 
 
 def main() -> None:
-    st.set_page_config(page_title="Dashboard Validasi SLA", layout="wide")
-    st.title("Dashboard Validasi SLA Existing vs SLA Aktual")
-    st.caption("Sumber data: ANALISA SLA.xlsx di folder proyek ini.")
+    st.set_page_config(page_title="Dashboard Analisa SLA", layout="wide")
+    st.title("Dashboard Analisa SLA Existing vs SLA Aktual")
 
     try:
         df = load_data()
@@ -218,6 +217,7 @@ def main() -> None:
     sort_label = st.sidebar.selectbox(
         "Urutkan berdasarkan",
         list(sort_options.keys()),
+        index=2,
     )
     sort_column = sort_options[sort_label]
     if sort_column in filtered.columns:
