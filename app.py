@@ -189,13 +189,20 @@ def main() -> None:
         return
 
     st.sidebar.header("Filter")
-    filtered = df.copy()
+    selected_filters: dict[str, list[str]] = {}
 
     for column in FILTER_COLUMNS:
-        if column not in filtered.columns:
+        if column not in df.columns:
             continue
-        options = sorted(filtered[column].dropna().astype(str).unique())
-        selected = st.sidebar.multiselect(column, options)
+        options = sorted(df[column].dropna().astype(str).unique())
+        selected_filters[column] = st.sidebar.multiselect(
+            column,
+            options,
+            key=f"filter_{column}",
+        )
+
+    filtered = df.copy()
+    for column, selected in selected_filters.items():
         if selected:
             filtered = filtered[filtered[column].astype(str).isin(selected)]
 
@@ -223,18 +230,24 @@ def main() -> None:
     if sort_column in filtered.columns:
         filtered = filtered.sort_values(sort_column, ascending=False)
 
-    max_routes = min(50, max(5, len(filtered))) if len(filtered) else 5
-    top_n = st.sidebar.slider(
-        "Jumlah rute ditampilkan",
-        min_value=5,
-        max_value=max_routes,
-        value=min(15, max_routes),
-        step=5,
-    )
-
     if filtered.empty:
         st.warning("Tidak ada data yang cocok dengan filter saat ini.")
         return
+
+    route_count = len(filtered)
+    if route_count <= 5:
+        top_n = route_count
+        st.sidebar.caption(f"Jumlah rute ditampilkan: {top_n}")
+    else:
+        max_routes = min(50, route_count)
+        default_top_n = min(15, max_routes)
+        top_n = st.sidebar.slider(
+            "Jumlah rute ditampilkan",
+            min_value=5,
+            max_value=max_routes,
+            value=default_top_n,
+            step=5,
+        )
 
     plot_df = filtered.head(top_n).copy()
 
