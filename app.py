@@ -290,25 +290,6 @@ def render_methodology_note() -> None:
             Kalau benchmark yang dipakai hanya `7`, maka `P95 Aktual = 5` akan terlihat masih aman.
             Padahal mayoritas area sebenarnya berjalan dengan SLA existing `2 hari`.
 
-            **Kesimpulan praktis**
-
-            Untuk benchmark utama, paling masuk akal memakai:
-
-            - `Weighted Avg SLA Max Existing`
-
-            karena itu paling mewakili SLA existing yang benar-benar dialami mayoritas AWB.
-
-            Untuk target performa aktual, tetap lihat:
-
-            - `P90 SLA Aktual`
-            - `P95 SLA Aktual`
-
-            Sebagai referensi tambahan, tetap berguna menampilkan:
-
-            - `SLA Min Existing`
-            - `SLA Max Existing`
-
-            sehingga pengguna bisa melihat rentang SLA yang berlaku saat ini.
             """
         )
 
