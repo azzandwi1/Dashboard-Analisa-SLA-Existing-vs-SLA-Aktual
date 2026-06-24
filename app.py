@@ -182,6 +182,15 @@ def render_methodology_note() -> None:
     with st.expander("Catatan: P90, P95, dan Weighted Average"):
         st.markdown(
             """
+            **Disclaimer**
+
+            Dashboard ini membaca rute pada level `Kota Asal -> Kota Tujuan`.
+            Sementara SLA existing bisa tersimpan lebih detail pada level
+            `Kota Asal -> Kecamatan Tujuan`.
+            Karena itu, ketika SLA existing diringkas ke level kota tujuan,
+            pendekatan yang dipakai adalah `weighted average` agar hasilnya
+            tetap mewakili komposisi AWB per kecamatan.
+
             **Apa itu P90 dan P95**
 
             - `P90 SLA Aktual` adalah nilai SLA di mana `90%` pengiriman selesai pada atau sebelum angka itu.
@@ -193,10 +202,13 @@ def render_methodology_note() -> None:
 
             **Kenapa memakai weighted average**
 
-            Weighted average dipakai karena tiap SLA existing bisa punya volume AWB berbeda.
-            Rute atau skenario dengan AWB besar harus punya pengaruh lebih besar daripada yang AWB-nya kecil.
+            Dalam analisa ini, weighted average lebih representatif daripada average biasa,
+            karena setiap kecamatan tujuan memiliki volume `AWB` yang berbeda.
+            Kecamatan dengan volume kiriman besar seharusnya punya pengaruh lebih besar
+            dibanding kecamatan dengan volume kecil.
 
-            Kalau hanya memakai rata-rata biasa, data dengan volume kecil bisa terlalu memengaruhi hasil akhir.
+            Kalau memakai average biasa, semua kecamatan dianggap sama besar,
+            padahal kondisi operasional nyatanya tidak seperti itu.
 
             **Rumus weighted average**
 
@@ -204,23 +216,99 @@ def render_methodology_note() -> None:
 
             Di dashboard ini, bobot yang dipakai adalah `Total AWB`.
 
-            **Contoh perhitungan**
+            **Contoh sederhana**
 
-            Misal untuk satu rute ada 3 kelompok pengiriman:
+            Misal ada 2 kecamatan tujuan dalam 1 kota:
 
-            - Kelompok A: `SLA Max Existing = 2 hari`, `AWB = 100`
-            - Kelompok B: `SLA Max Existing = 4 hari`, `AWB = 50`
-            - Kelompok C: `SLA Max Existing = 6 hari`, `AWB = 25`
+            - Kecamatan A: `AWB = 10.000`, `Max SLA = 2 hari`
+            - Kecamatan B: `AWB = 100`, `Max SLA = 10 hari`
 
-            Maka:
+            Jika pakai **average biasa**:
 
-            `Weighted Avg SLA Max Existing = ((2×100) + (4×50) + (6×25)) / (100+50+25)`
+            `(2 + 10) / 2 = 6 hari`
 
-            `= (200 + 200 + 150) / 175`
+            Hasil `6 hari` ini menyesatkan, karena hampir semua kiriman sebenarnya menuju Kecamatan A
+            yang SLA-nya hanya `2 hari`.
 
-            `= 3.14 hari`
+            Jika pakai **weighted average**:
 
-            Jadi angka weighted average lebih mewakili kondisi aktual karena mengikuti proporsi volume AWB.
+            `((10.000 × 2) + (100 × 10)) / (10.000 + 100)`
+
+            `= 21.000 / 10.100 = 2,08 hari`
+
+            Hasil `2,08 hari` jauh lebih mencerminkan kondisi operasional sebenarnya.
+
+            **Kenapa penting untuk analisa SLA ini**
+
+            Di dashboard ini, Anda membandingkan:
+
+            - `SLA Existing`
+            - `P90 SLA Aktual`
+            - `P95 SLA Aktual`
+
+            pada level:
+
+            - `Kota Asal -> Kota Tujuan`
+
+            Sementara data SLA existing bisa berasal dari level yang lebih detail,
+            misalnya `Kota Asal -> Kecamatan Tujuan`.
+            Dalam satu kota tujuan bisa ada banyak kecamatan dengan SLA berbeda.
+
+            Contoh:
+
+            - Cengkareng: `AWB = 5.000`, `Max SLA = 2`
+            - Kalideres: `AWB = 4.000`, `Max SLA = 2`
+            - Kapuk: `AWB = 3.000`, `Max SLA = 2`
+            - Kepulauan Seribu: `AWB = 50`, `Max SLA = 7`
+
+            Jika pakai **average biasa**:
+
+            `(2 + 2 + 2 + 7) / 4 = 3,25 hari`
+
+            Padahal mayoritas kiriman ada di SLA `2 hari`.
+
+            Jika pakai **weighted average**:
+
+            `((5.000×2) + (4.000×2) + (3.000×2) + (50×7)) / 12.050`
+
+            `= 24.350 / 12.050 = 2,02 hari`
+
+            Hasil ini lebih realistis untuk dijadikan benchmark.
+
+            **Kenapa tidak langsung pakai SLA Max terbesar**
+
+            Kalau langsung pakai SLA max terbesar, benchmark bisa jadi terlalu longgar.
+
+            Misal dalam satu kota tujuan ada SLA:
+
+            - `2`
+            - `2`
+            - `2`
+            - `2`
+            - `7`
+
+            Kalau benchmark yang dipakai hanya `7`, maka `P95 Aktual = 5` akan terlihat masih aman.
+            Padahal mayoritas area sebenarnya berjalan dengan SLA existing `2 hari`.
+
+            **Kesimpulan praktis**
+
+            Untuk benchmark utama, paling masuk akal memakai:
+
+            - `Weighted Avg SLA Max Existing`
+
+            karena itu paling mewakili SLA existing yang benar-benar dialami mayoritas AWB.
+
+            Untuk target performa aktual, tetap lihat:
+
+            - `P90 SLA Aktual`
+            - `P95 SLA Aktual`
+
+            Sebagai referensi tambahan, tetap berguna menampilkan:
+
+            - `SLA Min Existing`
+            - `SLA Max Existing`
+
+            sehingga pengguna bisa melihat rentang SLA yang berlaku saat ini.
             """
         )
 
