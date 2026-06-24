@@ -178,9 +178,57 @@ def build_comparison_chart(plot_df: pd.DataFrame) -> go.Figure:
     return fig
 
 
+def render_methodology_note() -> None:
+    with st.expander("Catatan: P90, P95, dan Weighted Average"):
+        st.markdown(
+            """
+            **Apa itu P90 dan P95**
+
+            - `P90 SLA Aktual` adalah nilai SLA di mana `90%` pengiriman selesai pada atau sebelum angka itu.
+            - `P95 SLA Aktual` adalah nilai SLA di mana `95%` pengiriman selesai pada atau sebelum angka itu.
+
+            Contoh sederhana:
+            Jika `P90 = 3 hari`, artinya `90 dari 100` pengiriman selesai maksimal `3 hari`.
+            Jika `P95 = 5 hari`, artinya `95 dari 100` pengiriman selesai maksimal `5 hari`.
+
+            **Kenapa memakai weighted average**
+
+            Weighted average dipakai karena tiap SLA existing bisa punya volume AWB berbeda.
+            Rute atau skenario dengan AWB besar harus punya pengaruh lebih besar daripada yang AWB-nya kecil.
+
+            Kalau hanya memakai rata-rata biasa, data dengan volume kecil bisa terlalu memengaruhi hasil akhir.
+
+            **Rumus weighted average**
+
+            `Weighted Average = Σ(nilai × bobot) / Σ(bobot)`
+
+            Di dashboard ini, bobot yang dipakai adalah `Total AWB`.
+
+            **Contoh perhitungan**
+
+            Misal untuk satu rute ada 3 kelompok pengiriman:
+
+            - Kelompok A: `SLA Max Existing = 2 hari`, `AWB = 100`
+            - Kelompok B: `SLA Max Existing = 4 hari`, `AWB = 50`
+            - Kelompok C: `SLA Max Existing = 6 hari`, `AWB = 25`
+
+            Maka:
+
+            `Weighted Avg SLA Max Existing = ((2×100) + (4×50) + (6×25)) / (100+50+25)`
+
+            `= (200 + 200 + 150) / 175`
+
+            `= 3.14 hari`
+
+            Jadi angka weighted average lebih mewakili kondisi aktual karena mengikuti proporsi volume AWB.
+            """
+        )
+
+
 def main() -> None:
     st.set_page_config(page_title="Dashboard Analisa SLA", layout="wide")
     st.title("Dashboard Analisa SLA Existing vs SLA Aktual")
+    render_methodology_note()
 
     try:
         df = load_data()
