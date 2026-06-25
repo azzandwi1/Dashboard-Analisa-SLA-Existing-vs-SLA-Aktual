@@ -382,7 +382,7 @@ def main() -> None:
     need_revision = filtered["Status Validasi SLA P95"].astype(str).eq("Perlu Penambahan SLA").sum()
     col4.metric("Rute Perlu Penambahan SLA", f"{need_revision:,}")
 
-    st.subheader("Visual Sederhana SLA Existing vs SLA Aktual")
+    st.subheader("Visual SLA Existing vs SLA Aktual")
     st.plotly_chart(build_comparison_chart(plot_df), use_container_width=True)
 
     st.subheader("Tabel Detail Rute")
