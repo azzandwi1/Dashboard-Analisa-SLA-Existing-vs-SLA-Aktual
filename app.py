@@ -56,7 +56,7 @@ def normalize_numeric(series: pd.Series) -> pd.Series:
 
 
 @st.cache_data(show_spinner=False)
-def load_data() -> pd.DataFrame:
+def load_data(_file_mtime_ns: int, _file_size: int) -> pd.DataFrame:
     if not DATA_FILE.exists():
         raise FileNotFoundError(f"File not found: {DATA_FILE}")
     df = pd.read_excel(DATA_FILE)
@@ -300,7 +300,8 @@ def main() -> None:
     render_methodology_note()
 
     try:
-        df = load_data()
+        file_stat = DATA_FILE.stat()
+        df = load_data(file_stat.st_mtime_ns, file_stat.st_size)
     except Exception as exc:
         st.error(f"Gagal membaca data: {exc}")
         return
